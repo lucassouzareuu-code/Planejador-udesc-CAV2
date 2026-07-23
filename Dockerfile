@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY planner.py /app/planner.py
+COPY Planner.py /app/planner.py
 
 EXPOSE 7860
 
