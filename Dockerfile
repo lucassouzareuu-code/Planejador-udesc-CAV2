@@ -17,5 +17,5 @@ COPY Planner.py /app/planner.py
 
 EXPOSE 10000
 
-# Usando o caminho correto do novnc_proxy (/usr/bin/novnc_proxy)
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1280x800x16 & sleep 1 && export DISPLAY=:99 && fluxbox & python3 /app/planner.py & x11vnc -display :99 -forever -nopw -listen localhost -port 5900 & novnc_proxy --vnc localhost:5900 --listen 10000"]
+# Usando o websockify diretamente apontando para a pasta do noVNC
+CMD ["sh", "-c", "Xvfb :99 -screen 0 1280x800x16 & sleep 1 && export DISPLAY=:99 && fluxbox & python3 /app/planner.py & x11vnc -display :99 -forever -nopw -listen localhost -port 5900 & websockify --web /usr/share/novnc 10000 localhost:5900"]
