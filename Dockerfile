@@ -1,13 +1,11 @@
-FROM kasmweb/desktop:1.14.0
+FROM ubuntu:22.04
 
-USER root
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Instala Python e Tkinter
+# Habilita repositórios adicionais e instala dependências necessárias
 RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    software-properties-common \
+    && add-apt-repository universe \
     && apt-get update && apt-get install -y \
     python3 \
     python3-tk \
@@ -20,13 +18,16 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
+# Configura o noVNC para abrir automaticamente no carregamento da página
+RUN cp /usr/share/novnc/vnc_auto.html /usr/share/novnc/index.html
+
 WORKDIR /app
+
+# Copia os arquivos da aplicação e do supervisor
 COPY Planner.py /app/planner.py
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Inicia o programa Tkinter junto com a sessão KasmVNC
-RUN echo "python3 /app/planner.py &" >> /dockerstartup/custom_startup.sh
-RUN chmod +x /dockerstartup/custom_startup.sh
+EXPOSE 10000
 
-EXPOSE 6901
-
-CMD ["/dockerstartup/kasm_default_script.sh"]
+# Inicializa o supervisor como processo principal do container
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
